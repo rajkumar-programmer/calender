@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Style Calendar</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        /* Calendar container */
+        .calendar {
+            width: 850px; /* Set calendar width to 850px */
+            height: 750px; /* Set height to 750px */
+            text-align: center;
+            border: 2px solid #333;
+            border-radius: 10px;
+            background-color: white;
+            padding: 40px; /* Added padding around the calendar */
+        }
+
+        /* Calendar header (Month and Year) */
+        .calendar-header {
+            background-color: #333;
+            color: white;
+            padding: 25px;
+            font-size: 2em; /* Larger font size for the header */
+            border-radius: 10px 10px 0 0;
+        }
+
+        /* Days of the week (Sun, Mon, etc.) */
+        .calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            grid-gap: 25px; /* Adjusted gap between day cells */
+            padding: 20px 0;
+        }
+
+        /* Individual day cell */
+        .calendar-day {
+            width: 100px; /* Increased width of day cell */
+            height: 100px; /* Increased height for more room */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #eee;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.8em; /* Slightly larger text for day numbers */
+            position: relative;
+            transition: background-color 0.3s ease-in-out; /* Smooth hover transition */
+        }
+
+        /* Passed days style (grayed out with cross) */
+        .calendar-day.passed {
+            background-color: #ddd;
+            color: #999;
+        }
+
+        /* Today's day (highlighted with a yellow background) */
+        .calendar-day.today {
+            background-color: #ffcc00;
+            font-weight: bold;
+        }
+
+        /* Disabled future days */
+        .calendar-day.disabled {
+            background-color: #f1f1f1;
+            cursor: not-allowed;
+        }
+
+        /* Red cross on passed days */
+        .calendar-day .cross {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 0, 0, 0.7);
+            color: white;
+            font-size: 3em; /* Increased size of the cross */
+            text-align: center;
+            line-height: 100px; /* Adjusted to center the cross */
+            transform: rotate(45deg);
+            visibility: hidden;
+        }
+
+        .calendar-day.passed .cross {
+            visibility: visible;
+        }
+
+        /* Hover effect on day cells */
+        .calendar-day:hover {
+            background-color: #bbb;
+        }
+
+        /* Day labels (Sun, Mon, etc.) */
+        .calendar-day-label {
+            font-weight: bold;
+            font-size: 1.2em;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="calendar">
+        <div class="calendar-header" id="calendar-header">November 2024</div>
+        <div class="calendar-days" id="calendar-days">
+            <!-- Days will be dynamically inserted here -->
+        </div>
+    </div>
+
+    <script>
+        const today = new Date();
+        const currentMonth = today.getMonth(); // 0-based (0 = January)
+        const currentYear = today.getFullYear();
+        const currentDay = today.getDate();
+        
+        function generateCalendar(month, year) {
+            // Get first day of the month
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const lastDate = lastDay.getDate();
+
+            // Days of the week names
+            const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+            const calendarHeader = document.getElementById("calendar-header");
+            const calendarDays = document.getElementById("calendar-days");
+
+            // Set the calendar header to current month/year
+            calendarHeader.innerHTML = `${firstDay.toLocaleString('default', { month: 'long' })} ${year}`;
+
+            // Clear previous days
+            calendarDays.innerHTML = '';
+
+            // Add the day labels (Sun, Mon, etc.)
+            daysOfWeek.forEach(day => {
+                const dayLabel = document.createElement('div');
+                dayLabel.classList.add('calendar-day-label');
+                dayLabel.textContent = day;
+                calendarDays.appendChild(dayLabel);
+            });
+
+            // Fill in the days of the month
+            for (let i = 1; i <= lastDate; i++) {
+                const day = new Date(year, month, i);
+                const dayElement = document.createElement('div');
+                dayElement.classList.add('calendar-day');
+                dayElement.textContent = i;
+
+                // Create a cross for passed days (only if the day is in the past)
+                const cross = document.createElement('div');
+                cross.classList.add('cross');
+                cross.textContent = 'X'; // Big red "X"
+                dayElement.appendChild(cross);
+
+                // Check if this day has passed
+                if (day < today) {
+                    dayElement.classList.add('passed');
+                }
+
+                // Highlight today's date, but don't show the cross for today
+                if (i === currentDay && month === currentMonth && year === currentYear) {
+                    dayElement.classList.add('today');
+                    cross.style.visibility = 'hidden'; // Hide the cross for today
+                }
+
+                // Disable future days (no interaction)
+                if (day > today) {
+                    dayElement.classList.add('disabled');
+                }
+
+                calendarDays.appendChild(dayElement);
+            }
+        }
+
+        // Generate the calendar for the current month
+        generateCalendar(currentMonth, currentYear);
+    </script>
+
+</body>
+</html>
